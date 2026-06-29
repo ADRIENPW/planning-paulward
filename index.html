@@ -6,32 +6,26 @@
 <title>Planning Marais — Paul Ward</title>
 <style>
   :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --border: #e2e0da;
-    --border-light: #eeece7;
-    --text: #1a1a18;
-    --text-muted: #6b6a66;
-    --text-hint: #a09e99;
-    --accent: #1a1a18;
-    --badge-a-bg: #ddeeff;
-    --badge-a-text: #0c447c;
-    --badge-b-bg: #d6f0e4;
-    --badge-b-text: #0f6e56;
-    --off-bg: #f0ede6;
-    --off-text: #888780;
-    --radius: 8px;
-    --radius-lg: 12px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --bg: #f7f6f3; --surface: #ffffff; --border: #e2e0da; --border-light: #eeece7;
+    --text: #1a1a18; --text-muted: #6b6a66; --text-hint: #a09e99; --accent: #1a1a18;
+    --badge-a-bg: #ddeeff; --badge-a-text: #0c447c;
+    --badge-b-bg: #d6f0e4; --badge-b-text: #0f6e56;
+    --off-bg: #f0ede6; --off-text: #888780;
+    --radius: 8px; --radius-lg: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
   header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 50; }
   .logo { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); }
   .logo span { color: var(--text-muted); font-weight: 400; }
   .nav-controls { display: flex; align-items: center; gap: 8px; margin-left: auto; }
   .month-label { font-size: 14px; font-weight: 500; min-width: 130px; text-align: center; }
+  .sync-status { font-size: 11px; color: var(--text-hint); display: flex; align-items: center; gap: 5px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #ccc; }
+  .sync-dot.ok { background: #1D9E75; }
+  .sync-dot.saving { background: #E8A800; animation: pulse 0.8s infinite; }
+  .sync-dot.error { background: #a32d2d; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   button { font-family: inherit; cursor: pointer; }
   .btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 12px; font-size: 13px; color: var(--text); transition: background 0.1s; }
   .btn:hover { background: var(--bg); }
@@ -40,13 +34,10 @@
   .btn-primary:hover { background: #333; }
   .btn-danger { color: #a32d2d; border-color: #f7c1c1; }
   .btn-danger:hover { background: #fcebeb; }
-
   main { max-width: 1200px; margin: 0 auto; padding: 20px 16px; }
-
   .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
   .leg-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
   .leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-
   .week-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; box-shadow: var(--shadow); }
   .week-grid { display: grid; grid-template-columns: 100px repeat(7, 1fr); }
   .week-header-row { background: #f9f8f5; border-bottom: 1px solid var(--border-light); }
@@ -61,7 +52,6 @@
   .day-num.today { color: #185FA5; }
   .day-num.weekend { color: var(--text-hint); }
   .day-num.other-month { opacity: 0; }
-
   .person-row { display: contents; }
   .person-row > * { border-top: 1px solid var(--border-light); }
   .person-name-cell { padding: 6px 10px; display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; border-right: 1px solid var(--border-light); }
@@ -71,68 +61,58 @@
   .day-cell.other-month { background: #faf9f7; cursor: default; }
   .day-cell.other-month:hover { background: #faf9f7; }
   .shift-lieu { font-size: 10px; border-radius: 4px; padding: 2px 5px; width: 100%; text-align: center; max-width: 72px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .shift-horaire { font-size: 9px; color: var(--text-hint); }
+  .shift-note { font-size: 9px; color: var(--text-hint); }
   .off-tag { font-size: 10px; background: var(--off-bg); color: var(--off-text); border-radius: 4px; padding: 2px 6px; }
   .add-cell { font-size: 18px; color: var(--text-hint); opacity: 0; transition: opacity 0.1s; }
   .day-cell:hover .add-cell { opacity: 1; }
-
-  /* Modal */
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 200; align-items: center; justify-content: center; }
   .overlay.open { display: flex; }
   .modal { background: var(--surface); border-radius: var(--radius-lg); padding: 20px; width: 300px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
   .modal h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
   .modal label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-top: 12px; margin-bottom: 4px; }
-  .modal select { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; background: var(--bg); color: var(--text); font-family: inherit; }
-  .off-toggle { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+  .modal select, .modal input[type=text] { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; background: var(--bg); color: var(--text); font-family: inherit; }
+  .status-group { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+  .status-option { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
   .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
   .modal-btns .btn { flex: 1; text-align: center; }
-
   .add-person-form { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
   .add-person-form input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; background: var(--bg); }
-
-  .export-bar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
-  .export-bar span { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+  .loading-bar { text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px; }
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">Paul Ward <span>/ Marais</span></div>
+  <div class="sync-status">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncLabel">—</span>
+  </div>
   <div class="nav-controls">
     <button class="btn btn-icon" onclick="changeMonth(-1)">&#8249;</button>
     <span class="month-label" id="monthLabel"></span>
     <button class="btn btn-icon" onclick="changeMonth(1)">&#8250;</button>
-    <button class="btn btn-primary" onclick="exportData()" style="margin-left:8px">&#8659; Exporter</button>
-    <label class="btn" style="cursor:pointer">&#8657; Importer <input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
   </div>
 </header>
-
 <main>
   <div class="add-person-form">
     <input type="text" id="newPersonName" placeholder="Ajouter une personne (ex: Mamou)">
     <button class="btn btn-primary" onclick="addPerson()">+ Ajouter</button>
   </div>
   <div class="legend" id="legend"></div>
-  <div id="calendar"></div>
+  <div id="calendar"><div class="loading-bar">Chargement du planning…</div></div>
 </main>
-
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
-  <div class="modal" id="modal">
+  <div class="modal">
     <h3 id="modal-title"></h3>
     <label>Lieu</label>
     <select id="m-lieu"></select>
     <label>Note (optionnel)</label>
-    <input type="text" id="m-note" placeholder="ex: +1h, formation, rdv médecin…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;background:var(--bg);color:var(--text);font-family:inherit;">
-    <div style="display:flex;flex-direction:column;gap:6px;margin-top:14px;">
-      <label class="off-toggle" style="margin-top:0">
-        <input type="radio" name="status" id="m-present" value="present"> Présent
-      </label>
-      <label class="off-toggle" style="margin-top:0">
-        <input type="radio" name="status" id="m-off" value="off"> Off / congé
-      </label>
-      <label class="off-toggle" style="margin-top:0">
-        <input type="radio" name="status" id="m-absent" value="absent"> Absent
-      </label>
+    <input type="text" id="m-note" placeholder="ex: +1h, formation, rdv médecin…">
+    <label>Statut</label>
+    <div class="status-group">
+      <label class="status-option"><input type="radio" name="status" value="present"> Présent</label>
+      <label class="status-option"><input type="radio" name="status" value="off"> Off / congé</label>
+      <label class="status-option"><input type="radio" name="status" value="absent"> Absent</label>
     </div>
     <div class="modal-btns">
       <button class="btn btn-primary" onclick="saveShift()">Enregistrer</button>
@@ -141,21 +121,22 @@
     </div>
   </div>
 </div>
-
 <script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwKLXny3RoJRWDCm4byIyl1pi1k22o4Nq8IC1oC_OdXYwtF_bDcWgPVH7dv8djmIhM4/exec';
+
 let appData = {
-  config: { referenceWeek: "2026-W28", referenceWeekType: "A" },
+  config: { referenceWeek: '2026-W28', referenceWeekType: 'A' },
   people: [
-    { name: "Adrien",   color: "#378ADD", text: "#042C53" },
-    { name: "Nathan",   color: "#D85A30", text: "#4A1B0C" },
-    { name: "Chjara",   color: "#D4537E", text: "#4B1528" },
-    { name: "Ayoub",    color: "#1D9E75", text: "#04342C" },
-    { name: "Éléonore", color: "#BA7517", text: "#412402" },
-    { name: "Marie",    color: "#7F77DD", text: "#26215C" },
-    { name: "Medhi",    color: "#639922", text: "#173404" },
-    { name: "Soraya",   color: "#E8A800", text: "#412402" }
+    { name: 'Adrien',   color: '#378ADD', text: '#042C53' },
+    { name: 'Nathan',   color: '#D85A30', text: '#4A1B0C' },
+    { name: 'Chjara',   color: '#D4537E', text: '#4B1528' },
+    { name: 'Ayoub',    color: '#1D9E75', text: '#04342C' },
+    { name: 'Éléonore', color: '#BA7517', text: '#412402' },
+    { name: 'Marie',    color: '#7F77DD', text: '#26215C' },
+    { name: 'Medhi',    color: '#639922', text: '#173404' },
+    { name: 'Soraya',   color: '#E8A800', text: '#412402' }
   ],
-  lieux: ["Marais", "BM", "BM Matin", "BM Soir", "BM Matin 10-18", "BM Soir 12-20"],
+  lieux: ['Marais', 'BM', 'BM Matin', 'BM Soir', 'BM Matin 10-18', 'BM Soir 12-20'],
   shifts: {}
 };
 
@@ -164,11 +145,48 @@ let currentMonth = 6;
 let editingKey = null;
 
 const EXTRA_COLORS = [
-  {color:"#5DCAA5",text:"#04342C"},{color:"#85B7EB",text:"#042C53"},
-  {color:"#EF9F27",text:"#412402"},{color:"#ED93B1",text:"#4B1528"},
-  {color:"#97C459",text:"#173404"},{color:"#F09595",text:"#501313"}
+  {color:'#5DCAA5',text:'#04342C'},{color:'#85B7EB',text:'#042C53'},
+  {color:'#EF9F27',text:'#412402'},{color:'#ED93B1',text:'#4B1528'},
+  {color:'#97C459',text:'#173404'},{color:'#F09595',text:'#501313'}
 ];
 let extraColorIdx = 0;
+
+function setSyncStatus(state, label) {
+  document.getElementById('syncDot').className = 'sync-dot ' + state;
+  document.getElementById('syncLabel').textContent = label;
+}
+
+async function loadFromScript() {
+  setSyncStatus('saving', 'Chargement…');
+  try {
+    const res = await fetch(SCRIPT_URL);
+    const data = await res.json();
+    appData.shifts = data.shifts || {};
+    if (data.people && data.people.length > 0) appData.people = data.people;
+    setSyncStatus('ok', 'Synchronisé');
+  } catch(e) {
+    setSyncStatus('error', 'Erreur de chargement');
+    console.error(e);
+  }
+  renderLegend();
+  renderCalendar();
+}
+
+async function saveToScript() {
+  setSyncStatus('saving', 'Sauvegarde…');
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shifts: appData.shifts, people: appData.people })
+    });
+    setSyncStatus('ok', 'Sauvegardé ✓');
+  } catch(e) {
+    setSyncStatus('error', 'Erreur de sauvegarde');
+    console.error(e);
+  }
+}
 
 function getISOWeek(d) {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -176,29 +194,19 @@ function getISOWeek(d) {
   const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
   return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
 }
-
 function getISOYear(d) {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
   return date.getUTCFullYear();
 }
-
 function weekType(date) {
-  const refParts = appData.config.referenceWeek.split('-W');
-  const refYear = parseInt(refParts[0]);
-  const refWeek = parseInt(refParts[1]);
+  const [refYear, refWeek] = appData.config.referenceWeek.split('-W').map(Number);
   const refIsA = appData.config.referenceWeekType === 'A';
-
-  const curWeek = getISOWeek(date);
-  const curYear = getISOYear(date);
-
   const refMonday = isoWeekToDate(refYear, refWeek);
-  const curMonday = isoWeekToDate(curYear, curWeek);
+  const curMonday = isoWeekToDate(getISOYear(date), getISOWeek(date));
   const diffWeeks = Math.round((curMonday - refMonday) / (7 * 86400000));
-  const isA = refIsA ? (diffWeeks % 2 === 0) : (diffWeeks % 2 !== 0);
-  return isA ? 'A' : 'B';
+  return (refIsA ? diffWeeks % 2 === 0 : diffWeeks % 2 !== 0) ? 'A' : 'B';
 }
-
 function isoWeekToDate(year, week) {
   const jan4 = new Date(Date.UTC(year, 0, 4));
   const dow = jan4.getUTCDay() || 7;
@@ -206,44 +214,34 @@ function isoWeekToDate(year, week) {
   monday.setUTCDate(jan4.getUTCDate() - dow + 1 + (week - 1) * 7);
   return monday;
 }
-
 function getWeeks(year, month) {
   const first = new Date(year, month, 1);
   const last = new Date(year, month + 1, 0);
   const weeks = [];
   const cur = new Date(first);
-  const dow = cur.getDay() || 7;
-  cur.setDate(cur.getDate() - dow + 1);
+  cur.setDate(cur.getDate() - ((cur.getDay() || 7) - 1));
   while (cur <= last) {
     const week = [];
-    for (let i = 0; i < 7; i++) {
-      week.push(new Date(cur));
-      cur.setDate(cur.getDate() + 1);
-    }
+    for (let i = 0; i < 7; i++) { week.push(new Date(cur)); cur.setDate(cur.getDate() + 1); }
     weeks.push(week);
   }
   return weeks;
 }
-
 function shiftKey(y, m, d, name) {
   return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}-${name}`;
 }
-
 function renderLegend() {
   document.getElementById('legend').innerHTML = appData.people.map(p =>
     `<div class="leg-item"><div class="leg-dot" style="background:${p.color}"></div><span>${p.name}</span></div>`
   ).join('');
 }
-
 function renderCalendar() {
   const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
   document.getElementById('monthLabel').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
-
   const weeks = getWeeks(currentYear, currentMonth);
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-
   let html = '';
   weeks.forEach(week => {
     const wn = getISOWeek(week[1]);
@@ -254,54 +252,40 @@ function renderCalendar() {
       const inMonth = d.getMonth() === currentMonth;
       const isToday = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}` === todayStr;
       const isWe = di >= 5;
-      html += `<div class="day-head week-header-row">
-        <div class="day-name">${DAYS[di]}</div>
-        <div class="day-num${isToday?' today':''}${isWe?' weekend':''}${!inMonth?' other-month':''}">${d.getDate()}</div>
-      </div>`;
+      html += `<div class="day-head week-header-row"><div class="day-name">${DAYS[di]}</div><div class="day-num${isToday?' today':''}${isWe?' weekend':''}${!inMonth?' other-month':''}">${d.getDate()}</div></div>`;
     });
-
     appData.people.forEach(p => {
-      html += `<div class="person-row">`;
-      html += `<div class="person-name-cell"><span class="person-dot" style="background:${p.color}"></span>${p.name}</div>`;
-      week.forEach((d, di) => {
+      html += `<div class="person-row"><div class="person-name-cell"><span class="person-dot" style="background:${p.color}"></span>${p.name}</div>`;
+      week.forEach(d => {
         const inMonth = d.getMonth() === currentMonth;
         if (!inMonth) { html += `<div class="day-cell other-month"></div>`; return; }
         const key = shiftKey(d.getFullYear(), d.getMonth(), d.getDate(), p.name);
         const s = appData.shifts[key];
         const esc = encodeURIComponent(JSON.stringify({y:d.getFullYear(),m:d.getMonth(),day:d.getDate(),name:p.name,key}));
         if (s && s.off) {
-          html += `<div class="day-cell" onclick="openModal('${esc}')"><span class="off-tag">off</span>${s.note ? `<span class="shift-horaire">${s.note}</span>` : ''}</div>`;
+          html += `<div class="day-cell" onclick="openModal('${esc}')"><span class="off-tag">off</span>${s.note?`<span class="shift-note">${s.note}</span>`:''}</div>`;
         } else if (s && s.absent) {
-          html += `<div class="day-cell" onclick="openModal('${esc}')"><span class="off-tag" style="background:#fce8e8;color:#a32d2d">absent</span>${s.note ? `<span class="shift-horaire">${s.note}</span>` : ''}</div>`;
+          html += `<div class="day-cell" onclick="openModal('${esc}')"><span class="off-tag" style="background:#fce8e8;color:#a32d2d">absent</span>${s.note?`<span class="shift-note">${s.note}</span>`:''}</div>`;
         } else if (s && s.lieu) {
-          html += `<div class="day-cell" onclick="openModal('${esc}')">
-            <span class="shift-lieu" style="background:${p.color}22;color:${p.text}">${s.lieu}</span>
-            ${s.note ? `<span class="shift-horaire">${s.note}</span>` : ''}
-          </div>`;
+          html += `<div class="day-cell" onclick="openModal('${esc}')"><span class="shift-lieu" style="background:${p.color}22;color:${p.text}">${s.lieu}</span>${s.note?`<span class="shift-note">${s.note}</span>`:''}</div>`;
         } else {
           html += `<div class="day-cell" onclick="openModal('${esc}')"><span class="add-cell">+</span></div>`;
         }
       });
       html += `</div>`;
     });
-
     html += `</div></div>`;
   });
   document.getElementById('calendar').innerHTML = html;
 }
-
 function openModal(esc) {
   const info = JSON.parse(decodeURIComponent(esc));
   editingKey = info.key;
   const p = appData.people.find(p => p.name === info.name);
   const d = new Date(info.y, info.m, info.day);
   const dateStr = d.toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('modal-title').innerHTML =
-    `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.color}"></span>${info.name} — ${dateStr}`;
-
-  const lieuxOpts = appData.lieux.map(l => `<option value="${l}">${l}</option>`).join('');
-  document.getElementById('m-lieu').innerHTML = lieuxOpts;
-
+  document.getElementById('modal-title').innerHTML = `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${p.color}"></span>${info.name} — ${dateStr}`;
+  document.getElementById('m-lieu').innerHTML = appData.lieux.map(l => `<option value="${l}">${l}</option>`).join('');
   const s = appData.shifts[editingKey] || {};
   if (s.lieu) document.getElementById('m-lieu').value = s.lieu;
   document.getElementById('m-note').value = s.note || '';
@@ -309,86 +293,37 @@ function openModal(esc) {
   document.querySelector(`input[name="status"][value="${status}"]`).checked = true;
   document.getElementById('overlay').classList.add('open');
 }
-
-function closeModal() {
-  document.getElementById('overlay').classList.remove('open');
-  editingKey = null;
-}
-
-function handleOverlayClick(e) {
-  if (e.target === document.getElementById('overlay')) closeModal();
-}
-
+function closeModal() { document.getElementById('overlay').classList.remove('open'); editingKey = null; }
+function handleOverlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
 function saveShift() {
   if (!editingKey) return;
   const status = document.querySelector('input[name="status"]:checked').value;
   const note = document.getElementById('m-note').value.trim();
-  if (status === 'off') {
-    appData.shifts[editingKey] = { off: true, note };
-  } else if (status === 'absent') {
-    appData.shifts[editingKey] = { absent: true, note };
-  } else {
-    appData.shifts[editingKey] = { lieu: document.getElementById('m-lieu').value, note };
-  }
-  closeModal();
-  renderCalendar();
+  if (status === 'off') appData.shifts[editingKey] = { off: true, note };
+  else if (status === 'absent') appData.shifts[editingKey] = { absent: true, note };
+  else appData.shifts[editingKey] = { lieu: document.getElementById('m-lieu').value, note };
+  closeModal(); renderCalendar(); saveToScript();
 }
-
 function deleteShift() {
   if (editingKey) delete appData.shifts[editingKey];
-  closeModal();
-  renderCalendar();
+  closeModal(); renderCalendar(); saveToScript();
 }
-
 function addPerson() {
   const name = document.getElementById('newPersonName').value.trim();
   if (!name || appData.people.find(p => p.name === name)) return;
-  const c = EXTRA_COLORS[extraColorIdx % EXTRA_COLORS.length];
-  extraColorIdx++;
+  const c = EXTRA_COLORS[extraColorIdx % EXTRA_COLORS.length]; extraColorIdx++;
   appData.people.push({ name, color: c.color, text: c.text });
   document.getElementById('newPersonName').value = '';
-  renderLegend();
-  renderCalendar();
+  renderLegend(); renderCalendar(); saveToScript();
 }
-
-function exportData() {
-  const blob = new Blob([JSON.stringify(appData, null, 2)], {type: 'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `planning-marais-${currentYear}-${String(currentMonth+1).padStart(2,'0')}.json`;
-  a.click();
-}
-
-function importData(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const d = JSON.parse(ev.target.result);
-      if (d.people && d.shifts !== undefined) {
-        appData = d;
-        renderLegend();
-        renderCalendar();
-      }
-    } catch(err) { alert('Fichier invalide'); }
-  };
-  reader.readAsText(file);
-}
-
 function changeMonth(dir) {
   currentMonth += dir;
   if (currentMonth > 11) { currentMonth = 0; currentYear++; }
   if (currentMonth < 0) { currentMonth = 11; currentYear--; }
   renderCalendar();
 }
-
-document.getElementById('newPersonName').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addPerson();
-});
-
-renderLegend();
-renderCalendar();
+document.getElementById('newPersonName').addEventListener('keydown', e => { if (e.key === 'Enter') addPerson(); });
+loadFromScript();
 </script>
 </body>
 </html>
